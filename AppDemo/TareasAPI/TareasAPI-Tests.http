@@ -1,0 +1,70 @@
+@hostname = localhost
+@port = 7116
+@host = https://{{hostname}}:{{port}}
+
+### Obtener todas las tareas
+GET {{host}}/api/tareas
+Accept: application/json
+
+### Obtener tarea por ID
+GET {{host}}/api/tareas/1
+Accept: application/json
+
+### Obtener tareas completadas
+GET {{host}}/api/tareas/estado/true
+Accept: application/json
+
+### Obtener tareas pendientes
+GET {{host}}/api/tareas/estado/false
+Accept: application/json
+
+### Crear nueva tarea
+POST {{host}}/api/tareas
+Content-Type: application/json
+
+{
+  "descripcion": "Implementar nueva funcionalidad de reportes",
+  "fechaLimite": "2024-12-31T23:59:59Z"
+}
+
+### Actualizar tarea completa
+PUT {{host}}/api/tareas/1
+Content-Type: application/json
+
+{
+  "descripcion": "Documentación actualizada del proyecto",
+  "fechaLimite": "2024-12-20T23:59:59Z",
+  "completada": true
+}
+
+### Actualizar solo descripción
+PUT {{host}}/api/tareas/2
+Content-Type: application/json
+
+{
+  "descripcion": "Revisar código del equipo - URGENTE"
+}
+
+### Marcar tarea como completada
+PATCH {{host}}/api/tareas/2/completar
+
+### Eliminar tarea
+DELETE {{host}}/api/tareas/3
+
+### Crear tarea con fecha inválida (debería fallar)
+POST {{host}}/api/tareas
+Content-Type: application/json
+
+{
+  "descripcion": "Esta tarea tiene fecha en el pasado",
+  "fechaLimite": "2020-01-01T00:00:00Z"
+}
+
+### Crear tarea con descripción muy corta (debería fallar)
+POST {{host}}/api/tareas
+Content-Type: application/json
+
+{
+  "descripcion": "Test",
+  "fechaLimite": "2024-12-31T23:59:59Z"
+}
