@@ -89,7 +89,8 @@ public class TareasController : ControllerBase
             Descripcion = tareaDto.Descripcion,
             FechaLimite = tareaDto.FechaLimite!.Value,
             FechaInicio = tareaDto.FechaInicio!.Value,
-            FechaCreacion = DateTime.UtcNow
+            FechaCreacion = DateTime.UtcNow,
+            ProjectId = tareaDto.ProjectId
         };
 
         var tareaCreada = await _repository.CrearAsync(tarea);
@@ -143,6 +144,10 @@ public class TareasController : ControllerBase
         if (tareaDto.Completada.HasValue)
             tareaExistente.Completada = tareaDto.Completada.Value;
 
+        // allow updating ProjectId
+        if (tareaDto.ProjectId.HasValue)
+            tareaExistente.ProjectId = tareaDto.ProjectId.Value;
+
         var tareaActualizada = await _repository.ActualizarAsync(id, tareaExistente);
         _logger.LogInformation("Tarea con ID {Id} actualizada", id);
 
@@ -188,5 +193,36 @@ public class TareasController : ControllerBase
         _logger.LogInformation("Tarea con ID {Id} marcada como completada", id);
 
         return Ok(tareaActualizada);
+    }
+
+    // Assign project to task
+    [HttpPost("{taskId}/assign-project")]
+    public async Task<IActionResult> AssignProject(int taskId, [FromBody] AssignProjectDto dto)
+    {
+        // validate task and project existence
+        var tarea = await _repository.ObtenerPorIdAsync(taskId);
+        if (tarea == null) return NotFound(new { mensaje = $"No se encontró la tarea con ID {taskId}" });
+
+        // check project exists in ProjectsController in-memory store
+        var proyectosType = typeof(ProjectsController);
+        var field = proyectosType.GetField("_projects", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+        if (field == null) return BadRequest(new { mensaje = "No se pudo validar el proyecto" });
+        var proyectos = (List<Project>?)field.GetValue(null);
+        if (proyectos == null || !proyectos.Any(p => p.Id == dto.ProjectId)) return NotFound(new { mensaje = $"No se encontró el proyecto con ID {dto.ProjectId}" });
+
+        tarea.ProjectId = dto.ProjectId;
+        await _repository.ActualizarAsync(taskId, tarea);
+        return NoContent();
+    }
+
+    [HttpPost("{taskId}/remove-project")]
+    public async Task<IActionResult> RemoveProject(int taskId)
+    {
+        var tarea = await _repository.ObtenerPorIdAsync(taskId);
+        if (tarea == null) return NotFound(new { mensaje = $"No se encontró la tarea con ID {taskId}" });
+
+        tarea.ProjectId = null;
+        await _repository.ActualizarAsync(taskId, tarea);
+        return NoContent();
     }
 }

@@ -20,4 +20,8 @@ public class Tarea
     
     [Required]
     public DateTime FechaCreacion { get; set; }
+
+    // Project association (optional)
+    public int? ProjectId { get; set; }
+    public Project? Project { get; set; }
 }
