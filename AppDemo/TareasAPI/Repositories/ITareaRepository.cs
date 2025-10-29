@@ -10,4 +10,5 @@ public interface ITareaRepository
     Task<Tarea?> ActualizarAsync(int id, Tarea tarea);
     Task<bool> EliminarAsync(int id);
     Task<IEnumerable<Tarea>> ObtenerPorEstadoAsync(bool completada);
+    Task<IEnumerable<Tarea>> ObtenerPorProjectIdAsync(int projectId);
 }

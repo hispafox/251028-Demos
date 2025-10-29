@@ -4,12 +4,14 @@ namespace TareasAPI.Repositories;
 
 public class TareaRepository : ITareaRepository
 {
-    private readonly List<Tarea> _tareas = new();
+    // make internal static so ProjectsController can access it for demo purposes
+    internal static List<Tarea> _tareas = new();
+
     private int _nextId = 1;
 
     public TareaRepository()
     {
-        // Datos de ejemplo
+        // datos de ejemplo
         _tareas.Add(new Tarea
         {
             Id = _nextId++,
@@ -29,21 +31,11 @@ public class TareaRepository : ITareaRepository
             FechaCreacion = DateTime.UtcNow,
             Completada = false
         });
-
-        _tareas.Add(new Tarea
-        {
-            Id = _nextId++,
-            Descripcion = "Preparar presentación para cliente",
-            FechaInicio = DateTime.UtcNow,
-            FechaLimite = DateTime.UtcNow.AddDays(7),
-            FechaCreacion = DateTime.UtcNow,
-            Completada = true
-        });
     }
 
     public Task<IEnumerable<Tarea>> ObtenerTodasAsync()
     {
-        return Task.FromResult(_tareas.AsEnumerable());
+        return Task.FromResult<IEnumerable<Tarea>>(_tareas.AsEnumerable());
     }
 
     public Task<Tarea?> ObtenerPorIdAsync(int id)
@@ -55,40 +47,43 @@ public class TareaRepository : ITareaRepository
     public Task<Tarea> CrearAsync(Tarea tarea)
     {
         tarea.Id = _nextId++;
-        // FechaCreacion ya debe estar establecida en el controlador
-        // No necesitamos validar ni modificar FechaInicio aquí, ya viene del DTO
+        // FechaCreacion ya debe estar establecida por el controlador en este diseño
         _tareas.Add(tarea);
         return Task.FromResult(tarea);
     }
 
-    public Task<Tarea?> ActualizarAsync(int id, Tarea tareaActualizada)
+    public Task<Tarea?> ActualizarAsync(int id, Tarea tarea)
     {
-        var tarea = _tareas.FirstOrDefault(t => t.Id == id);
-        if (tarea == null)
-            return Task.FromResult<Tarea?>(null);
+        var existing = _tareas.FirstOrDefault(t => t.Id == id);
+        if (existing == null) return Task.FromResult<Tarea?>(null);
 
-        tarea.Descripcion = tareaActualizada.Descripcion;
-        tarea.FechaLimite = tareaActualizada.FechaLimite;
-        tarea.FechaInicio = tareaActualizada.FechaInicio;
-        tarea.Completada = tareaActualizada.Completada;
-        // FechaCreacion nunca se actualiza
+        existing.Descripcion = tarea.Descripcion;
+        existing.FechaLimite = tarea.FechaLimite;
+        existing.Completada = tarea.Completada;
+        existing.FechaInicio = tarea.FechaInicio;
+        existing.FechaCreacion = tarea.FechaCreacion;
+        existing.ProjectId = tarea.ProjectId;
 
-        return Task.FromResult<Tarea?>(tarea);
+        return Task.FromResult(existing);
     }
 
     public Task<bool> EliminarAsync(int id)
     {
         var tarea = _tareas.FirstOrDefault(t => t.Id == id);
-        if (tarea == null)
-            return Task.FromResult(false);
-
+        if (tarea == null) return Task.FromResult(false);
         _tareas.Remove(tarea);
         return Task.FromResult(true);
     }
 
     public Task<IEnumerable<Tarea>> ObtenerPorEstadoAsync(bool completada)
     {
-        var tareas = _tareas.Where(t => t.Completada == completada);
-        return Task.FromResult(tareas.AsEnumerable());
+        var res = _tareas.Where(t => t.Completada == completada).AsEnumerable();
+        return Task.FromResult(res);
+    }
+
+    public Task<IEnumerable<Tarea>> ObtenerPorProjectIdAsync(int projectId)
+    {
+        var res = _tareas.Where(t => t.ProjectId == projectId).AsEnumerable();
+        return Task.FromResult(res);
     }
 }

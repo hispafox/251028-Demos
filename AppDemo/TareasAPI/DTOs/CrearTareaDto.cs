@@ -16,6 +16,9 @@ public class CrearTareaDto
     [Required(ErrorMessage = "La fecha de inicio es obligatoria")]
 
     public DateTime? FechaInicio { get; set; }
+
+    // optional
+    public int? ProjectId { get; set; }
 }
 
 
