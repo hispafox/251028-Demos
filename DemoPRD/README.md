@@ -1,15 +1,20 @@
 # TodoApp - API RESTful para Gestión de Tareas
 
-API RESTful completa desarrollada con .NET 8 para la gestión de tareas (To-Do List), implementando las mejores prácticas de desarrollo y una estrategia de pruebas exhaustiva.
+API RESTful completa desarrollada con .NET 8 para la gestión de tareas (To-Do List), implementando las mejores prácticas de desarrollo, **persistencia con Entity Framework Core**, **generación de datos con Bogus**, y una estrategia de pruebas exhaustiva.
 
 ## ?? Características
 
 - ? **API RESTful completa** con operaciones CRUD
+- ? **Persistencia de datos** con Entity Framework Core
+- ? **Patrón Repository** para abstracción de datos
+- ? **DTOs y AutoMapper** para separación de capas
+- ? **?? Seeding con Bogus** para datos de prueba realistas
 - ? **Arquitectura limpia** con separación de responsabilidades
 - ? **Pruebas exhaustivas** (Unitarias, Integración y E2E)
 - ? **Documentación automática** con Swagger/OpenAPI
 - ? **Inyección de dependencias** configurada
 - ? **.NET 8** con las últimas características
+- ? **Multi-base de datos** (SQLite, SQL Server, PostgreSQL)
 
 ## ?? Requisitos Previos
 
@@ -17,7 +22,9 @@ API RESTful completa desarrollada con .NET 8 para la gestión de tareas (To-Do Li
 - Visual Studio 2022 (17.8+) o VS Code con C# DevKit
 - Git (opcional)
 
-## ??? Instalación y Configuración
+## ?? Instalación y Configuración
+
+> ?? **¿Primera vez?** Sigue la **[Guía de Inicio Rápido](INICIO-RAPIDO.md)** para estar listo en 5 minutos.
 
 ### 1. Clonar el Repositorio
 
@@ -82,20 +89,38 @@ dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
 ```
 TodoApp/
 ??? src/
-?   ??? TodoApp.Api/  # Proyecto principal de la API
-?       ??? Controllers/          # Controladores REST
-?       ??? Services/   # Lógica de negocio
-?       ??? Models/   # Modelos de datos
-?       ??? Program.cs  # Punto de entrada
+?   ??? TodoApp.Api/    # Proyecto principal de la API
+?       ??? Controllers/    # Controladores REST
+?       ??? Services/      # Lógica de negocio
+?       ??? Data/         # ? Capa de persistencia
+?       ?   ??? TodoDbContext.cs
+?       ?   ??? Repositories/ # Repositorios
+?  ?   ??? Entities/     # Entidades de BD
+?       ?   ??? Configurations/ # Configuraciones EF
+?       ?   ??? Seeders/      # ?? Generación de datos con Bogus
+?     ?   ??? Extensions/   # Extension methods
+?       ??? DTOs/        # ? Objetos de transferencia
+?       ??? Mappings/       # ? Configuración AutoMapper
+?       ??? Models/      # Modelos (legacy)
+?       ??? Migrations/     # ? Migraciones EF Core
+?       ??? Program.cs        # Punto de entrada
 ?
 ??? tests/
 ?   ??? TodoApp.UnitTests/        # Pruebas unitarias
 ?   ??? TodoApp.IntegrationTests/ # Pruebas de integración
-???? TodoApp.E2ETests/ # Pruebas end-to-end
+?   ??? TodoApp.E2ETests/     # Pruebas end-to-end
 ?
-??? TodoApp.sln           # Archivo de solución
-??? README.md     # Este archivo
+??? TodoApp.sln         # Archivo de solución
+??? README.md        # Este archivo
+??? PRD-TodoApp.md         # PRD original
+??? PRD-Persistencia-TodoApp.md# PRD de persistencia con Bogus
+??? INDICE-DOCUMENTACION.md      # Índice maestro
+??? RESUMEN-BOGUS-SEEDING.md     # Guía rápida de Bogus
 ```
+
+**Leyenda:**
+- ? Agregado en v2.0 (Persistencia)
+- ?? Agregado en v2.1 (Bogus Seeding)
 
 ## ?? API Endpoints
 
@@ -200,25 +225,69 @@ curl -X DELETE https://localhost:5001/api/todos/1
 
 ## ?? Limitaciones Actuales
 
-- **Almacenamiento en memoria**: Los datos se pierden al reiniciar
-- **No thread-safe**: No apto para entornos concurrentes
-- **Sin persistencia**: No hay base de datos configurada
-- **Sin autenticación**: No hay control de acceso
+### ? Fuera del Alcance (Versión Actual)
+
+- Unit of Work complejo
+- Auditoría automática de cambios
+- Soft delete (eliminación lógica)
+- Autenticación y autorización
+- Paginación avanzada
+- Caché distribuido (Redis)
+- Frontend/Cliente web
 
 ## ?? Mejoras Futuras
 
-- [ ] Persistencia con Entity Framework Core
+### ? Implementado en v2.1
+- [x] Persistencia con Entity Framework Core
+- [x] Patrón Repository genérico y específico
+- [x] DTOs y AutoMapper
+- [x] ?? Seeding de datos con Bogus
+- [x] Migraciones de base de datos
+- [x] Soporte multi-base de datos
+
+### ?? Próximas Versiones
 - [ ] Autenticación y autorización JWT
-- [ ] Paginación y filtros
+- [ ] Paginación y filtros avanzados
 - [ ] Logging con Serilog
+- [ ] Health checks
 - [ ] Frontend (Blazor/React/Angular)
 - [ ] Docker y contenedores
 - [ ] CI/CD con GitHub Actions
+- [ ] Caché con Redis
+- [ ] API versionada
 
 ## ?? Documentación
 
-- [PRD Completo](PRD-TodoApp.md) - Documento de requisitos del producto
-- [Swagger UI](https://localhost:5001/swagger) - Documentación interactiva de la API
+### ?? Documentos Principales
+
+1. **[PRD Original](PRD-TodoApp.md)** (v1.0) - Diseño original de la API
+   - Arquitectura base sin persistencia
+   - Estrategia de pruebas
+   - Almacenamiento en memoria
+
+2. **[PRD de Persistencia](PRD-Persistencia-TodoApp.md)** (v2.1) ? **RECOMENDADO**
+   - Implementación completa de Entity Framework Core
+   - Patrón Repository y DTOs
+   - **?? Seeding de datos con Bogus** (NUEVO)
+   - Migraciones y configuración de BD
+ - Plan de implementación detallado
+
+3. **[Índice de Documentación](INDICE-DOCUMENTACION.md)** - Guía completa de todos los documentos
+
+### ?? Guías Rápidas
+
+- **[Resumen de Implementación](RESUMEN-IMPLEMENTACION.md)** - Vista rápida del proyecto
+- **[Resumen de Bogus](RESUMEN-BOGUS-SEEDING.md)** ?? - Guía rápida de seeding de datos
+- **[Ejemplos de Uso](EJEMPLOS-USO.md)** - Ejemplos de la API
+- **[Comandos Útiles](COMANDOS.md)** - Referencia de comandos
+
+### ?? Código de Ejemplo
+
+- **[Ejemplo de Bogus](EJEMPLO-CODIGO-BOGUS.cs)** ?? - Código completo listo para usar
+
+### ?? Documentación Interactiva
+
+- **[Swagger UI](https://localhost:5001/swagger)** - Documentación interactiva de la API (cuando la app esté corriendo)
 
 ## ?? Contribuir
 
@@ -246,4 +315,4 @@ Este proyecto es material educativo y está disponible para uso en cursos y capac
 
 ---
 
-**? Si este proyecto te fue útil, considera darle una estrella en GitHub!**
+**?? Si este proyecto te fue útil, considera darle una estrella en GitHub!**
