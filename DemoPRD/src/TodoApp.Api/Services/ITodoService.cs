@@ -1,44 +1,44 @@
-using TodoApp.Api.Models;
+using TodoApp.Api.DTOs;
 
 namespace TodoApp.Api.Services;
 
 /// <summary>
-/// Interfaz para el servicio de gestión de tareas.
+/// Interfaz para el servicio de gestión de tareas con persistencia
 /// </summary>
 public interface ITodoService
 {
     /// <summary>
-    /// Obtiene todas las tareas.
+    /// Obtiene todas las tareas
     /// </summary>
-    /// <returns>Colección de todas las tareas.</returns>
-    IEnumerable<TodoItem> GetAll();
+    Task<IEnumerable<TodoItemDto>> GetAllAsync();
 
     /// <summary>
-    /// Obtiene una tarea por su ID.
+    /// Obtiene una tarea por su ID
     /// </summary>
-    /// <param name="id">ID de la tarea.</param>
-    /// <returns>La tarea si existe, null en caso contrario.</returns>
-    TodoItem? GetById(int id);
+    Task<TodoItemDto?> GetByIdAsync(int id);
 
     /// <summary>
-    /// Agrega una nueva tarea.
+    /// Crea una nueva tarea
     /// </summary>
-    /// <param name="item">Tarea a agregar.</param>
-    /// <returns>La tarea agregada con su ID asignado.</returns>
-    TodoItem Add(TodoItem item);
+    Task<TodoItemDto> CreateAsync(CreateTodoItemDto dto);
 
     /// <summary>
-    /// Actualiza una tarea existente.
-  /// </summary>
-    /// <param name="id">ID de la tarea a actualizar.</param>
-    /// <param name="item">Datos actualizados de la tarea.</param>
-    /// <returns>La tarea actualizada si existe, null en caso contrario.</returns>
-    TodoItem? Update(int id, TodoItem item);
+    /// Actualiza una tarea existente
+    /// </summary>
+    Task<TodoItemDto?> UpdateAsync(int id, UpdateTodoItemDto dto);
 
     /// <summary>
-    /// Elimina una tarea.
+    /// Elimina una tarea
     /// </summary>
-    /// <param name="id">ID de la tarea a eliminar.</param>
-    /// <returns>true si se eliminó correctamente, false si no existe.</returns>
-    bool Delete(int id);
+    Task<bool> DeleteAsync(int id);
+
+    /// <summary>
+    /// Obtiene todas las tareas completadas
+    /// </summary>
+    Task<IEnumerable<TodoItemDto>> GetCompletedAsync();
+
+    /// <summary>
+    /// Obtiene todas las tareas pendientes
+    /// </summary>
+    Task<IEnumerable<TodoItemDto>> GetPendingAsync();
 }

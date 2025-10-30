@@ -1,94 +1,79 @@
-using TodoApp.Api.Models;
+using AutoMapper;
+using TodoApp.Api.Data.Entities;
+using TodoApp.Api.Data.Repositories;
+using TodoApp.Api.DTOs;
 
 namespace TodoApp.Api.Services;
 
 /// <summary>
-/// Implementación del servicio de gestión de tareas.
-/// Utiliza almacenamiento en memoria.
+/// Implementación del servicio de gestión de tareas con persistencia
 /// </summary>
 public class TodoService : ITodoService
 {
-    private readonly List<TodoItem> _todos = new();
-    private int _nextId = 1;
+    private readonly ITodoRepository _repository;
+    private readonly IMapper _mapper;
 
-  /// <summary>
-    /// Obtiene todas las tareas.
-    /// </summary>
-    public IEnumerable<TodoItem> GetAll()
+    public TodoService(ITodoRepository repository, IMapper mapper)
     {
-        return _todos.ToList();
+        _repository = repository;
+        _mapper = mapper;
     }
 
-    /// <summary>
-    /// Obtiene una tarea por su ID.
-    /// </summary>
-    public TodoItem? GetById(int id)
+    public async Task<IEnumerable<TodoItemDto>> GetAllAsync()
     {
-        return _todos.FirstOrDefault(t => t.Id == id);
+        var entities = await _repository.GetAllAsync();
+        return _mapper.Map<IEnumerable<TodoItemDto>>(entities);
     }
 
-    /// <summary>
-    /// Agrega una nueva tarea.
-    /// </summary>
-    /// <exception cref="ArgumentNullException">Si el item es null.</exception>
-    /// <exception cref="ArgumentException">Si el título está vacío.</exception>
-    public TodoItem Add(TodoItem item)
+    public async Task<TodoItemDto?> GetByIdAsync(int id)
     {
-        if (item == null)
-    {
-        throw new ArgumentNullException(nameof(item), "El item no puede ser nulo");
-        }
-
-        if (string.IsNullOrWhiteSpace(item.Title))
-   {
-            throw new ArgumentException("El título no puede estar vacío", nameof(item));
-        }
-
-        item.Id = _nextId++;
-        _todos.Add(item);
-return item;
+        var entity = await _repository.GetByIdAsync(id);
+        return entity == null ? null : _mapper.Map<TodoItemDto>(entity);
     }
 
-    /// <summary>
-    /// Actualiza una tarea existente.
-    /// </summary>
-    /// <exception cref="ArgumentNullException">Si el item es null.</exception>
-    /// <exception cref="ArgumentException">Si el título está vacío.</exception>
-    public TodoItem? Update(int id, TodoItem item)
+    public async Task<TodoItemDto> CreateAsync(CreateTodoItemDto dto)
     {
-        if (item == null)
-        {
-            throw new ArgumentNullException(nameof(item), "El item no puede ser nulo");
-        }
+        if (string.IsNullOrWhiteSpace(dto.Title))
+            throw new ArgumentException("El título no puede estar vacío");
 
-        if (string.IsNullOrWhiteSpace(item.Title))
-        {
-     throw new ArgumentException("El título no puede estar vacío", nameof(item));
-   }
+        var entity = _mapper.Map<TodoEntity>(dto);
+        entity.CreatedAt = DateTime.UtcNow;
 
-        var existingTodo = GetById(id);
-        if (existingTodo == null)
-        {
-  return null;
-     }
-
-        existingTodo.Title = item.Title;
-        existingTodo.IsComplete = item.IsComplete;
- return existingTodo;
+        var created = await _repository.AddAsync(entity);
+        return _mapper.Map<TodoItemDto>(created);
     }
 
-    /// <summary>
-    /// Elimina una tarea.
-    /// </summary>
-    public bool Delete(int id)
+    public async Task<TodoItemDto?> UpdateAsync(int id, UpdateTodoItemDto dto)
     {
-        var todo = GetById(id);
-        if (todo == null)
-        {
-        return false;
-   }
+        if (string.IsNullOrWhiteSpace(dto.Title))
+            throw new ArgumentException("El título no puede estar vacío");
 
-        _todos.Remove(todo);
-        return true;
+        var entity = await _repository.GetByIdAsync(id);
+        if (entity == null)
+            return null;
+
+        entity.Title = dto.Title;
+        entity.IsComplete = dto.IsComplete;
+        entity.UpdatedAt = DateTime.UtcNow;
+
+        var updated = await _repository.UpdateAsync(entity);
+        return _mapper.Map<TodoItemDto>(updated);
+    }
+
+    public async Task<bool> DeleteAsync(int id)
+    {
+        return await _repository.DeleteAsync(id);
+    }
+
+    public async Task<IEnumerable<TodoItemDto>> GetCompletedAsync()
+    {
+        var entities = await _repository.GetCompletedAsync();
+        return _mapper.Map<IEnumerable<TodoItemDto>>(entities);
+    }
+
+    public async Task<IEnumerable<TodoItemDto>> GetPendingAsync()
+    {
+        var entities = await _repository.GetPendingAsync();
+        return _mapper.Map<IEnumerable<TodoItemDto>>(entities);
     }
 }
